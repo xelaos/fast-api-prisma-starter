@@ -1,6 +1,5 @@
 from typing import List
 from fastapi import FastAPI, HTTPException
-from models.ItemPayload import ItemPayload
 from prisma.models import Item
 from helper.prismaClient import prisma
 

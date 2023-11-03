@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from prisma.models import Item
 from helper.prismaClient import prisma
 
@@ -15,18 +16,21 @@ async def startup():
 async def shutdown():
     await prisma.disconnect()
 
+class ItemDto(BaseModel):
+    name: str
+    quantity: int
 
 # Route to add a item
 @app.post("/items/{name}/{quantity}")
-async def add_item(name: str, quantity: int) -> dict[str, Item]:
-    if quantity <= 0:
+async def add_item(item: ItemDto) -> dict[str, Item]:
+    if item.quantity <= 0:
         raise HTTPException(status_code=400, detail="Quantity must be greater than 0.")
     # if item already exists, we'll just add the quantity.
     # get all item names
 
-    item = await prisma.item.create(data={"name": name, "quantity": quantity})
+    updatedItem = await prisma.item.create(data={"name": item.name, "quantity": item.quantity})
 
-    return {"item": item}
+    return {"item": updatedItem}
 
 
 # Route to list a specific item by ID
